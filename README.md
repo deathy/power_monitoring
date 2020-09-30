@@ -158,3 +158,35 @@ Data should be fed into InfluxDB now.
 - in SELECT change field(value) to field(power)
 - you should already start seeing graph data showing milliwatts
 - add more graphs, group by device, ask someone who knows grafana better
+
+## Daily Totals monitoring 
+
+**New** 2020-09-30
+
+I also want to gather long term data by day/week/month and compare it to the power bill. And this presents some problems:
+- my InfluxDB feeder may fail (from experience, saw it happen) sometimes or miss some data points
+- Averaging even over measurements made every second could give odd results
+- too many data points to work with, totals per day would be good enough
+
+Thankfully the HS110 plug does store total power usage per day on the plug and this is available via pyHS100. 
+As far as I know it stores last 30 days with totals per day and also aggregate monthly numbers.
+
+We want to be able to look up a certain day's measurements even from a few months ago, so we're just going to periodically
+save the data in our own small SQLite database.
+
+- pre-requisites: `pip install sqlite3 jinja2` if not existing
+- copy [hs110_daily_gather.py](hs110_daily_gather.py) somewhere on the system
+- also copy [daily_template.html](daily_template.html) in the same folder as the python script
+- set HS110 device IPs in `plug_ips = ["192.168.XXX.XXX", "192.168.XXX.XXX", "192.168.XXX.XXX"]`
+- make the script executable if needed using `chmod +x hs110_daily_gather.py`
+- run `./hs110_daily_gather.py` which will do the following
+    - it will create a `daily_power_usage.db` file if not existing. This is the SQLite database
+    - it will gather daily usage data from the HS110 plugs for the current month and previous month and update them in the database
+    - it will render the `daily_template.html` as `daily_rendered.html` file. 
+    This is a basic bootstrap styled table as can be seen below with all the power usage totals  
+- set a cronjob to run the `hs110_daily_gather.py` script at least daily or more frequently if you wish the current day's total
+usage to be more up to date
+- Optional: I also created a symlink to serve it via my webserver and plugged it into Grafana using the AJAX Panel Plugin ( https://grafana.com/grafana/plugins/ryantxu-ajax-panel ) 
+
+
+![Daily Totals](power_monitoring_daily_totals_table.png)
