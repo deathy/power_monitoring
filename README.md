@@ -174,7 +174,7 @@ As far as I know it stores last 30 days with totals per day and also aggregate m
 We want to be able to look up a certain day's measurements even from a few months ago, so we're just going to periodically
 save the data in our own small SQLite database.
 
-- pre-requisites: `pip install sqlite3 jinja2` if not existing
+- pre-requisites: `pip install jinja2` if not existing
 - copy [hs110_daily_gather.py](hs110_daily_gather.py) somewhere on the system
 - also copy [daily_template.html](daily_template.html) in the same folder as the python script
 - set HS110 device IPs in `plug_ips = ["192.168.XXX.XXX", "192.168.XXX.XXX", "192.168.XXX.XXX"]`
